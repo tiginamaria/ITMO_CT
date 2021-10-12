@@ -1,1 +1,1 @@
-{"PHOTOS_FOLDER": "processed_photos"}
+{"directories": {"processed_photo": "processed_photos"}, "databases": {"photo": "photo.csv"}, "apis": {"location_key": "9b6abe72-c629-42d6-aec0-37393d031787", "weather_key": "7ca7b1e0-45a4-45f1-96de-2ea1a260ca8b"}}
