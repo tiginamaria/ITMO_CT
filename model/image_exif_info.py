@@ -6,13 +6,13 @@ import pandas as pd
 
 from model.image_datatime_info import DataTimeInfo
 from model.image_gps_info import GPSInfo
+from model.image_meta_info import ImageMetaInfo
 
 
 class ExifDataKey(str, Enum):
     """ Dict fields in image exif data. """
     DATETIME = 'DateTime'
     GPS_INFO = 'GPSInfo'
-    LOCATION = 'Location'
 
 
 @dataclass(frozen=True)
@@ -35,15 +35,15 @@ class ImageExifInfo:
         )
 
     @staticmethod
-    def from_meta_data(meta_data: Dict[str, Any]) -> 'ImageExifInfo':
+    def from_meta_info(meta_info: ImageMetaInfo) -> 'ImageExifInfo':
         """ Parse exif information from dict with meta data.
-        :param meta_data: image dict with meta data
+        :param meta_info: image dict with meta data
         :return: exif information
         """
 
         return ImageExifInfo(
-            data_time=DataTimeInfo.from_datetime(meta_data[ExifDataKey.DATETIME]),
-            gps_info=GPSInfo(meta_data[ExifDataKey.LOCATION][0], meta_data[ExifDataKey.LOCATION][1]),
+            data_time=DataTimeInfo.from_datetime(meta_info.date_time),
+            gps_info=GPSInfo(meta_info.location[0], meta_info.location[1]),
         )
 
     @classmethod

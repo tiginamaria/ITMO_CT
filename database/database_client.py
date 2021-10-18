@@ -39,7 +39,7 @@ class ImageDatabaseCSVClient(ImageDatabaseClient):
 
     def add_all_images(self, new_images: List[ImageInfo]):
         df_image = pd.read_csv(self.image_database_path)
-        image_last_id = df_image.size
+        image_last_id = df_image.shape[0]
 
         for i, new_image in enumerate(new_images):
             new_image.id = image_last_id + i

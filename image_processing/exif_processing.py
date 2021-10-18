@@ -1,17 +1,17 @@
-from typing import Any, Dict
-
 import logging
+
 from PIL import Image
 from PIL.ExifTags import TAGS
 
 from model.image_exif_info import ImageExifInfo, ExifDataKey
+from model.image_meta_info import ImageMetaInfo
 
 
-def extract_exif_info_from_image(image: Image, meta_data: Dict[str, Any]) -> ImageExifInfo:
+def extract_exif_info_from_image(image: Image, meta_info: ImageMetaInfo) -> ImageExifInfo:
     """
     Method extracts exif data from image.
     :param image: image to extract exif data
-    :param meta_data: if exif data is not provided in image information must be given in meta
+    :param meta_info: if exif data is not provided in image information must be given in meta
     :return: exif information
     """
 
@@ -33,7 +33,7 @@ def extract_exif_info_from_image(image: Image, meta_data: Dict[str, Any]) -> Ima
         return ImageExifInfo.from_exif_data(exif_data_dict)
     else:
         logging.warning("DateTime and GPSInfo not provided in image exif data. Trying to use meta data")
-        if meta_data is not None:
-            return ImageExifInfo.from_meta_data(meta_data)
+        if meta_info is not None:
+            return ImageExifInfo.from_meta_info(meta_info)
         else:
             raise Exception("DateTime and GPSInfo not provided in image meta and exif data")

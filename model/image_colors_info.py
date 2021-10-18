@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from typing import List
 
@@ -17,11 +18,11 @@ class ImageColorInfo:
 
     def to_json(self):
         return {
-            'r': self.r,
-            'g': self.g,
-            'b': self.b,
-            'hex': self.hex,
-            'percent': self.percent
+            "r": self.r,
+            "g": self.g,
+            "b": self.b,
+            "hex": self.hex,
+            "percent": self.percent
         }
 
 
@@ -32,10 +33,12 @@ class ImageColorsInfo:
     @classmethod
     def from_row(cls, row: pd.Series) -> 'ImageColorsInfo':
         info_json = row[ColorsInfoColumnName.COLORS]
-        image_color_info = from_dict(data_class=ImageColorsInfo, data=info_json)
+        image_color_info = from_dict(data_class=ImageColorsInfo, data=json.loads(info_json.replace('\'', '\"')))
         return image_color_info
 
     def to_json(self):
         return {
-            ColorsInfoColumnName.COLORS: [color.to_json() for color in self.colors]
+            ColorsInfoColumnName.COLORS: {
+                "colors": [color.to_json() for color in self.colors]
+            }
         }

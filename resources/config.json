@@ -1,6 +1,7 @@
 {
   "resource": {
-    "upload_dir": "resources/images_to_process"
+    "upload_dir": "resources/images_to_process",
+    "upload_meta_data_file_path": "resources/images_to_process/upload_meta_data.json"
   },
   "database": {
     "database_csv_file_path": "resources/image.csv",

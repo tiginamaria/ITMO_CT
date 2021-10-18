@@ -23,11 +23,11 @@ class ExifInfoColumnName(str, Enum):
 
 class ImageInfoColumnName(str, Enum):
     ID = 'id'
-    PATH = 'path'
+    NAME = 'name'
 
 
 COLUMNS_NAMES = [ImageInfoColumnName.ID,
-                 ImageInfoColumnName.PATH,
+                 ImageInfoColumnName.NAME,
                  ExifInfoColumnName.DATETIME,
                  ExifInfoColumnName.SEASON,
                  ExifInfoColumnName.LATITUDE,
