@@ -13,8 +13,8 @@ def get_weather_data(exif_info: ImageExifInfo) -> ImageWeatherInfo:
     open_weather_client = OpenWeatherClient('5fd3acb9e271365266e92fce70c407d3')
 
     # Using api get weather for location and data in exif data
-    open_weather_response = open_weather_client.get_weather((exif_info.gps_info.latitude, exif_info.gps_info.longitude),
-                                                            exif_info.data_time.date_time)
+    open_weather_response = open_weather_client.get_history_weather((exif_info.gps_info.latitude, exif_info.gps_info.longitude),
+                                                                    exif_info.data_time.date_time)
     info = open_weather_response.list[0]
     return ImageWeatherInfo(
         weather_id=info.weather[0].id,
