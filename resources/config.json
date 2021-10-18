@@ -1,0 +1,14 @@
+{
+  "resource": {
+    "upload_dir": "resources/images_to_process"
+  },
+  "database": {
+    "database_csv_file_path": "resources/image.csv",
+    "database_resources_path": "resources/images"
+  },
+  "clients": {
+    "yandex_geocoder_api_key": "9b6abe72-c629-42d6-aec0-37393d031787",
+    "yandex_weather_api_key": "7ca7b1e0-45a4-45f1-96de-2ea1a260ca8b",
+    "open_weather_api_key": "5fd3acb9e271365266e92fce70c407d3"
+  }
+}

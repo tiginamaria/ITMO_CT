@@ -6,3 +6,4 @@ typing~=3.7.4.3
 Pillow~=8.1.2
 matplotlib~=3.3.4
 scikit-learn~=1.0
+dacite~=1.6.0

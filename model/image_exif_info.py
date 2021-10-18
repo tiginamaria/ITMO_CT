@@ -1,0 +1,67 @@
+from dataclasses import dataclass
+from enum import Enum
+from typing import Dict, Any
+
+import pandas as pd
+
+from model.image_datatime_info import DataTimeInfo
+from model.image_gps_info import GPSInfo
+
+
+class ExifDataKey(str, Enum):
+    """ Dict fields in image exif data. """
+    DATETIME = 'DateTime'
+    GPS_INFO = 'GPSInfo'
+    LOCATION = 'Location'
+
+
+@dataclass(frozen=True)
+class ImageExifInfo:
+    """ Class which holds all information about image. """
+
+    data_time: DataTimeInfo
+    gps_info: GPSInfo
+
+    @staticmethod
+    def from_exif_data(exif_data: Dict[str, Any]) -> 'ImageExifInfo':
+        """ Parse exif information from dict with exif data.
+        :param exif_data: extracted from image dict with exif data
+        :return: exif information
+        """
+
+        return ImageExifInfo(
+            data_time=DataTimeInfo.from_exif_data(exif_data[ExifDataKey.DATETIME]),
+            gps_info=GPSInfo.from_exif_data(exif_data[ExifDataKey.GPS_INFO]),
+        )
+
+    @staticmethod
+    def from_meta_data(meta_data: Dict[str, Any]) -> 'ImageExifInfo':
+        """ Parse exif information from dict with meta data.
+        :param meta_data: image dict with meta data
+        :return: exif information
+        """
+
+        return ImageExifInfo(
+            data_time=DataTimeInfo.from_datetime(meta_data[ExifDataKey.DATETIME]),
+            gps_info=GPSInfo(meta_data[ExifDataKey.LOCATION][0], meta_data[ExifDataKey.LOCATION][1]),
+        )
+
+    @classmethod
+    def from_row(cls, row: pd.Series) -> 'ImageExifInfo':
+        """ Parse exif information from dataset raw.
+        :param row: dataset raw to parse exif information from
+        :return: exif information
+        """
+        return ImageExifInfo(
+            data_time=DataTimeInfo.from_row(row),
+            gps_info=GPSInfo.from_row(row)
+        )
+
+    def to_json(self):
+        """ Damp exif information to dict.
+        :return: dict with exif information
+        """
+        return {
+            **self.data_time.to_json(),
+            **self.gps_info.to_json(),
+        }
