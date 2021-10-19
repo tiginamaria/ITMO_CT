@@ -5,6 +5,7 @@
   },
   "database": {
     "database_csv_file_path": "resources/image.csv",
+	"database_db_file_path": "database/photos.db",
     "database_resources_path": "resources/images"
   },
   "clients": {
