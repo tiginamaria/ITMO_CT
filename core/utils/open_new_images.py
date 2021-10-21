@@ -15,8 +15,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog
 
 class PhotoSelector(QApplication):
     
-    def __init__(self, system):
-        super().__init__(system)
+    def __init__(self, argv):
+        super().__init__(argv)
         self.screen_width = self._get_window_width()
         self.screen_height = self._get_window_height()
         self.dialog_window = DialogWidget(self.screen_width, self.screen_height)
@@ -47,5 +47,5 @@ class DialogWidget(QWidget):
         self.setGeometry(self.left, self.top, self.window_width, self.window_height)
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        files, _ = QFileDialog.getOpenFileNames(self, self.title, "","All Image Files (*.jpg *.jpeg *.png)", options=options)
+        files, _ = QFileDialog.getOpenFileNames(self, self.title, "","All files (*);; All Image Files (*.jpg *.jpeg *.png)", options=options)
         return files

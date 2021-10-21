@@ -9,8 +9,10 @@ class ImageDatabase:
     
     def __init__(self, database_path):
         self.db_path = database_path
-     
-    def add_new_photo(self, photo_name):
+ 
+# Filling functions
+ 
+    def add_new_image(self, photo_name):
         current_dt = datetime.utcnow()
         current_dt = str(current_dt).split('.')[0]
         self._open_database()
@@ -38,7 +40,16 @@ class ImageDatabase:
         self._open_database()
         self.cursor.execute("INSERT INTO Colors (PhotoID, ColorRed, ColorGreen, ColorBlue) VALUES (?, ?, ?, ?)", (entry_id, red_value, green_value, blue_value))
         self._close_database()
-        
+
+# Response functions
+
+    def get_all_image_names(self):
+        self._open_database()
+        result = self.cursor.execute("SELECT PhotoName FROM Photos")
+        result = result.fetchall()
+        self._close_database()
+        return result
+
     def get_image_name_by_exact_color(self, red_value, green_value, blue_value):
         self._open_database()
         result = self.cursor.execute("SELECT PhotoName FROM Photos WHERE PhotoID IN (SELECT PhotoID FROM Colors WHERE ColorRed=? AND ColorGreen=? AND ColorBlue=?)", (red_value, green_value, blue_value))
@@ -46,10 +57,22 @@ class ImageDatabase:
         self._close_database()
         return result
     
-    def get_color_by_parameters(self, month_min, month_max, latitude_min, latitude_max, longitude_min, longitude_max, weather_min, weather_max):
-        # To implement
-        return False
-        
+    def get_entry_id_by_parameters(self, datetime_min, datetime_max, latitude_min, latitude_max, longitude_min, longitude_max, weather_min, weather_max):
+        self._open_database()
+        result = self.cursor.execute("SELECT PhotoID FROM Photos WHERE (datetime(PhotoDateTime) BETWEEN datetime(?) AND datetime(?)) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)", (datetime_min, datetime_max, latitude_min, latitude_max, longitude_min, longitude_max, weather_min, weather_max))
+        result = result.fetchall()
+        self._close_database()
+        return result
+    
+    def get_colors_by_entry_id(self, entry_id):
+        self._open_database()
+        result = self.cursor.execute("SELECT ColorRed, ColorGreen, ColorBlue FROM Colors WHERE PhotoID=?", (entry_id,))
+        result = result.fetchall()
+        self._close_database()
+        return result
+
+# Service functions
+
     def _open_database(self):
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
