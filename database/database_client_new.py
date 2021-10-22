@@ -45,7 +45,7 @@ class ImageDatabase:
                             (entry_id, red_value, green_value, blue_value))
         self._close_database()
 
-    # Response functions
+    # Request functions
 
     def get_all_image_names(self):
         self._open_database()
@@ -63,6 +63,7 @@ class ImageDatabase:
         self._close_database()
         return result
 
+    # Wrong realization of SQL request: request for date/time to be rewritten
     def get_entry_id_by_parameters(self, datetime_min: datetime, datetime_max: datetime,
                                    latitude_min: float, latitude_max: float,
                                    longitude_min: float, longitude_max: float,
@@ -72,6 +73,13 @@ class ImageDatabase:
             "SELECT PhotoID FROM Photos WHERE (datetime(PhotoDateTime) BETWEEN datetime(?) AND datetime(?)) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)",
             (datetime_min, datetime_max, latitude_min, latitude_max, longitude_min, longitude_max, weather_min,
              weather_max))
+        result = result.fetchall()
+        self._close_database()
+        return result
+    
+    def get_location_by_entry_id(self, entry_id: int):
+        self._open_database()
+        result = self.cursor.execute("SELECT LocationLatitude, LocationLongitude FROM Photos WHERE PhotoID=?", (entry_id,))
         result = result.fetchall()
         self._close_database()
         return result
