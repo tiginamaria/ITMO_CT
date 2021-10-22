@@ -63,16 +63,27 @@ class ImageDatabase:
         self._close_database()
         return result
 
-    # Wrong realization of SQL request: request for date/time to be rewritten
-    def get_entry_id_by_parameters(self, datetime_min: datetime, datetime_max: datetime,
-                                   latitude_min: float, latitude_max: float,
-                                   longitude_min: float, longitude_max: float,
-                                   weather_min: int, weather_max: int):
+    def get_entry_id_by_parameters(self, hour_interval_left: str, hour_interval_right: str,
+                                   month_interval_left: str, month_interval_right: str,
+                                   latitude_interval_left: float, latitude_interval_right: float,
+                                   longitude_interval_left: float, longitude_interval_right: float,
+                                   weather_interval_left: int, weather_interval_right: int):
+        request_list = [
+            "SELECT PhotoID FROM Photos WHERE ((strftime('%H', time(PhotoDateTime)) >= ?) OR (strftime('%H', time(PhotoDateTime)) <= ?)) AND (strftime('%m', date(PhotoDateTime)) BETWEEN ? AND ?) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)",
+            "SELECT PhotoID FROM Photos WHERE ((strftime('%H', time(PhotoDateTime)) BETWEEN ? AND ?) AND (strftime('%m', date(PhotoDateTime)) >= ?) OR (strftime('%m', date(PhotoDateTime)) <= ?)) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)",
+            "SELECT PhotoID FROM Photos WHERE ((strftime('%H', time(PhotoDateTime)) BETWEEN ? AND ?) AND (strftime('%m', date(PhotoDateTime)) BETWEEN ? AND ?) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)"]
+        intervals_tuple = (hour_interval_left, hour_interval_right,
+             month_interval_left, month_interval_right,
+             latitude_interval_left, latitude_interval_right,
+             longitude_interval_left, longitude_interval_right,
+             weather_interval_left, weather_interval_right)
         self._open_database()
-        result = self.cursor.execute(
-            "SELECT PhotoID FROM Photos WHERE (datetime(PhotoDateTime) BETWEEN datetime(?) AND datetime(?)) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)",
-            (datetime_min, datetime_max, latitude_min, latitude_max, longitude_min, longitude_max, weather_min,
-             weather_max))
+        if (hour_interval_left > hour_interval_right) and (month_interval_left < month_interval_right):
+            result = self.cursor.execute(request_list[0], intervals_tuple)
+        elif (hour_interval_left < hour_interval_right) and (month_interval_left > month_interval_right):
+            result = self.cursor.execute(request_list[1], intervals_tuple)
+        elif:
+            result = self.cursor.execute(request_list[2], intervals_tuple)
         result = result.fetchall()
         self._close_database()
         return result
