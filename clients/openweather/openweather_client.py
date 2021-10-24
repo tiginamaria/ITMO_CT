@@ -13,7 +13,8 @@ class OpenWeatherClient:
 
     def __init__(self, key: str):
         self._key = key
-        self._url = 'http://history.openweathermap.org/data/2.5/history/city'
+        self._history_url = 'http://history.openweathermap.org/data/2.5/history/city'
+        self._weather_url = 'https://api.openweathermap.org/data/2.5/weather'
 
     def get_history_weather(self, location: Tuple[float, float], date_time: datetime) -> Optional[WeatherFullInfo]:
         """ Method get weather forecast for given location and datatime from openweather service.
@@ -22,7 +23,7 @@ class OpenWeatherClient:
         :return: open weather response
         """
 
-        url = f'{self._url}?lat={location[0]}&lon={location[1]}&type=hour&appid={self._key}'
+        url = f'{self._history_url}?lat={location[0]}&lon={location[1]}&type=hour&appid={self._key}'
 
         # Openweather student pack api provides only 1 year back forecasts, so id given datatime is out of this range,
         # request is build for the same day but less then 1 year back
@@ -48,3 +49,14 @@ class OpenWeatherClient:
         if open_weather_response.list is None or len(open_weather_response.list) == 0:
             return None
         return open_weather_response.list[0]
+
+    def get_current_weather(self, location: Tuple[float, float]) -> Optional[WeatherFullInfo]:
+        url = f'{self._weather_url}?lat={location[0]}&lon={location[1]}&appid={self._key}'
+
+        # Sending request to openweather server
+        response = requests.get(url).json()
+
+        # Parsing openweather response
+        open_weather_response = from_dict(data_class=WeatherFullInfo, data=response)
+
+        return open_weather_response

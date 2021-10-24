@@ -41,7 +41,7 @@ class WeatherFullInfo:
 
 @dataclass
 class OpenWeatherResponse:
-    message: str
+    message: Optional[str]
     cod: Optional[str]
     city_id: Optional[int]
     calctime: Optional[float]
