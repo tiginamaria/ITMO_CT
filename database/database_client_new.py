@@ -39,10 +39,10 @@ class ImageDatabase:
         self.cursor.execute("UPDATE Photos SET Weather=? WHERE PhotoID=?", (weather, entry_id))
         self._close_database()
 
-    def add_color(self, entry_id: int, red_value: float, green_value: float, blue_value: float):
+    def add_color(self, entry_id: int, red_value: float, green_value: float, blue_value: float, color_percentage: int):
         self._open_database()
-        self.cursor.execute("INSERT INTO Colors (PhotoID, ColorRed, ColorGreen, ColorBlue) VALUES (?, ?, ?, ?)",
-                            (entry_id, red_value, green_value, blue_value))
+        self.cursor.execute("INSERT INTO Colors (PhotoID, ColorRed, ColorGreen, ColorBlue, ColorPercentage) VALUES (?, ?, ?, ?, ?)",
+                            (entry_id, red_value, green_value, blue_value, color_percentage))
         self._close_database()
 
     # Request functions
@@ -69,6 +69,7 @@ class ImageDatabase:
                                    longitude_interval_left: float, longitude_interval_right: float,
                                    weather_interval_left: int, weather_interval_right: int):
         request_list = [
+            "SELECT PhotoID FROM Photos WHERE ((strftime('%H', time(PhotoDateTime)) >= ?) OR (strftime('%H', time(PhotoDateTime)) <= ?)) AND (strftime('%m', date(PhotoDateTime)) >= ?) OR (strftime('%m', date(PhotoDateTime)) <= ?)) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)",
             "SELECT PhotoID FROM Photos WHERE ((strftime('%H', time(PhotoDateTime)) >= ?) OR (strftime('%H', time(PhotoDateTime)) <= ?)) AND (strftime('%m', date(PhotoDateTime)) BETWEEN ? AND ?) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)",
             "SELECT PhotoID FROM Photos WHERE ((strftime('%H', time(PhotoDateTime)) BETWEEN ? AND ?) AND (strftime('%m', date(PhotoDateTime)) >= ?) OR (strftime('%m', date(PhotoDateTime)) <= ?)) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)",
             "SELECT PhotoID FROM Photos WHERE ((strftime('%H', time(PhotoDateTime)) BETWEEN ? AND ?) AND (strftime('%m', date(PhotoDateTime)) BETWEEN ? AND ?) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)"]
@@ -78,12 +79,14 @@ class ImageDatabase:
              longitude_interval_left, longitude_interval_right,
              weather_interval_left, weather_interval_right)
         self._open_database()
-        if (hour_interval_left > hour_interval_right) and (month_interval_left < month_interval_right):
+        if (hour_interval_left > hour_interval_right) and (month_interval_left > month_interval_right):
             result = self.cursor.execute(request_list[0], intervals_tuple)
-        elif (hour_interval_left < hour_interval_right) and (month_interval_left > month_interval_right):
+        elif (hour_interval_left > hour_interval_right) and (month_interval_left < month_interval_right):
             result = self.cursor.execute(request_list[1], intervals_tuple)
-        elif:
+        elif (hour_interval_left < hour_interval_right) and (month_interval_left > month_interval_right):
             result = self.cursor.execute(request_list[2], intervals_tuple)
+        elif:
+            result = self.cursor.execute(request_list[3], intervals_tuple)
         result = result.fetchall()
         self._close_database()
         return result
