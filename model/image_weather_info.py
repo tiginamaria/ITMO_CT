@@ -1,5 +1,5 @@
-import json
 from dataclasses import dataclass
+
 import pandas as pd
 
 from database.model.columns import WeatherInfoColumnName

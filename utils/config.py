@@ -18,6 +18,7 @@ class ClientConfig:
 class DatabaseConfig:
     """ Config data for database. """
 
+    database_db_file_path: str
     database_csv_file_path: str
     database_resources_path: str
 

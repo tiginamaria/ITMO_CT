@@ -1,6 +1,6 @@
 # This file helps to get new photos location on the computer
 
-'''
+"""
 ***** Example of typical usage *****
 Create new object with type PhotoSelector:
 selected_photos = PhotoSelector(sys.argv)
@@ -8,9 +8,8 @@ Create variable where list of new photo paths will be stored:
 selected_photos_path = selected_photos.run_UI()
 Delete object in order to free up memory after usage:
 del(selected_photo)
-'''
+"""
 
-import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog
 
 

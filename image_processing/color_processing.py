@@ -11,7 +11,7 @@ from sklearn.cluster import KMeans
 from model.image_colors_info import ImageColorInfo, ImageColorsInfo
 
 
-def _get_colors_clusters(img: np.array, colors_count: int = 20):
+def _get_colors_clusters(img: np.array, colors_count: int = 10):
     """ Apply k-mean clustering to get main colors from image. """
 
     # Initialize k-mean classifier

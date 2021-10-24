@@ -7,7 +7,7 @@ from model.image_exif_info import ImageExifInfo, ExifDataKey
 from model.image_meta_info import ImageMetaInfo
 
 
-def extract_exif_info_from_image(image: Image, meta_info: ImageMetaInfo) -> ImageExifInfo:
+def extract_exif_info_from_image(image: Image, meta_info: ImageMetaInfo = None) -> ImageExifInfo:
     """
     Method extracts exif data from image.
     :param image: image to extract exif data
