@@ -68,26 +68,30 @@ class ImageDatabase:
                                    latitude_interval_left: float, latitude_interval_right: float,
                                    longitude_interval_left: float, longitude_interval_right: float,
                                    weather_interval_left: int, weather_interval_right: int):
-        request_list = [
-            "SELECT PhotoID FROM Photos WHERE ((strftime('%H', time(PhotoDateTime)) >= ?) OR (strftime('%H', time(PhotoDateTime)) <= ?)) AND (strftime('%m', date(PhotoDateTime)) >= ?) OR (strftime('%m', date(PhotoDateTime)) <= ?)) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)",
-            "SELECT PhotoID FROM Photos WHERE ((strftime('%H', time(PhotoDateTime)) >= ?) OR (strftime('%H', time(PhotoDateTime)) <= ?)) AND (strftime('%m', date(PhotoDateTime)) BETWEEN ? AND ?) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)",
-            "SELECT PhotoID FROM Photos WHERE ((strftime('%H', time(PhotoDateTime)) BETWEEN ? AND ?) AND (strftime('%m', date(PhotoDateTime)) >= ?) OR (strftime('%m', date(PhotoDateTime)) <= ?)) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)",
-            "SELECT PhotoID FROM Photos WHERE ((strftime('%H', time(PhotoDateTime)) BETWEEN ? AND ?) AND (strftime('%m', date(PhotoDateTime)) BETWEEN ? AND ?) AND (LocationLatitude BETWEEN ? AND ?) AND (LocationLongitude BETWEEN ? AND ?) AND (Weather BETWEEN ? AND ?)"]
-        intervals_tuple = (hour_interval_left, hour_interval_right,
-             month_interval_left, month_interval_right,
-             latitude_interval_left, latitude_interval_right,
-             longitude_interval_left, longitude_interval_right,
-             weather_interval_left, weather_interval_right)
+
+        request_text = "SELECT PhotoID FROM Photos WHERE TRUE"
+
+        if (hour_interval_left > hour_interval_right):
+            request_text += " AND ((cast(strftime('%H', time(PhotoDateTime)) as INTEGER) >= {}) OR (cast(strftime('%H', time(PhotoDateTime)) as INTEGER) <= {}))".format(hour_interval_left, hour_interval_right)
+        else:
+            request_text += " AND (cast(strftime('%H', time(PhotoDateTime)) as INTEGER) BETWEEN {} AND {})".format(hour_interval_left, hour_interval_right)
+
+        if (month_interval_left > month_interval_right):
+            request_text += " AND ((cast(strftime('%m', date(PhotoDateTime)) as INTEGER) >= {}) OR (cast(strftime('%m', date(PhotoDateTime)) as INTEGER) <= {}))".format(month_interval_left, month_interval_right)
+        else:
+            request_text += " AND (cast(strftime('%m', date(PhotoDateTime)) as INTEGER) BETWEEN {} AND {})".format(month_interval_left, month_interval_right)
+
+        request_text += " AND (LocationLatitude BETWEEN {} AND {})".format(latitude_interval_left, latitude_interval_right)
+        request_text += " AND (LocationLongitude BETWEEN {} AND {})".format(longitude_interval_left, longitude_interval_right)
+        request_text += " AND (Weather BETWEEN {} AND {})".format(weather_interval_left, weather_interval_right)
+        
+        print(request_text)
+        
         self._open_database()
-        if (hour_interval_left > hour_interval_right) and (month_interval_left > month_interval_right):
-            result = self.cursor.execute(request_list[0], intervals_tuple)
-        elif (hour_interval_left > hour_interval_right) and (month_interval_left < month_interval_right):
-            result = self.cursor.execute(request_list[1], intervals_tuple)
-        elif (hour_interval_left < hour_interval_right) and (month_interval_left > month_interval_right):
-            result = self.cursor.execute(request_list[2], intervals_tuple)
-        elif:
-            result = self.cursor.execute(request_list[3], intervals_tuple)
+        
+        result = self.cursor.execute(request_text)
         result = result.fetchall()
+        
         self._close_database()
         return result
     

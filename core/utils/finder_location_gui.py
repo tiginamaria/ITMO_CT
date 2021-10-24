@@ -3,17 +3,16 @@
 '''
 ***** Example of typical usage *****
 Create new object with type UserLocation:
-user_location_ui = UserLocation()
+user_location_gui = UserLocation()
 Create variable where will be stored user's GPS location or user's address
-user_location_list = user_location_ui.run_UI()
+user_location_list = user_location_gui.run_GUI()
 How to understand what is inserted?
 * List contains 1 element - address inserted
 * List contains 2 elements - GPS inserted
 '''
 
-import sys
-from PyQt5.QtCore import * 
-from PyQt5.QtGui import *
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import * 
 
 class UserLocation(QApplication):
@@ -23,9 +22,9 @@ class UserLocation(QApplication):
         super().__init__([])
         self.screen_width = self._get_window_width()
         self.screen_height = self._get_window_height()
-        self._setup_UI()
+        self._setup_GUI()
         
-    def _setup_UI(self):
+    def _setup_GUI(self):
         
         self.window = QWidget()
         self.window_width = 600
@@ -34,8 +33,9 @@ class UserLocation(QApplication):
         self.top = (self.screen_height - self.window_height) / 2
         self.window.setGeometry(self.left, self.top, self.window_width, self.window_height)
     
-    def run_UI(self):
+    def run_GUI(self):
         
+        self.response = []
         self._select_input_type()
         self.window.show()
         self.exec_()
