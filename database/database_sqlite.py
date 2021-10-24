@@ -4,8 +4,10 @@
 import sqlite3
 from datetime import datetime
 
-
 # Describing class for database operations
+from typing import Tuple
+
+
 class ImageDatabase:
 
     def __init__(self, database_path):
@@ -41,8 +43,9 @@ class ImageDatabase:
 
     def add_color(self, entry_id: int, red_value: float, green_value: float, blue_value: float, color_percentage: int):
         self._open_database()
-        self.cursor.execute("INSERT INTO Colors (PhotoID, ColorRed, ColorGreen, ColorBlue, ColorPercentage) VALUES (?, ?, ?, ?, ?)",
-                            (entry_id, red_value, green_value, blue_value, color_percentage))
+        self.cursor.execute(
+            "INSERT INTO Colors (PhotoID, ColorRed, ColorGreen, ColorBlue, ColorPercentage) VALUES (?, ?, ?, ?, ?)",
+            (entry_id, red_value, green_value, blue_value, color_percentage))
         self._close_database()
 
     # Request functions
@@ -90,17 +93,30 @@ class ImageDatabase:
         self._open_database()
         
         result = self.cursor.execute(request_text)
+
         result = result.fetchall()
         
         self._close_database()
         return result
-    
-    def get_location_by_entry_id(self, entry_id: int):
+
+    def get_image_name_by_entry_id(self, entry_id: int):
         self._open_database()
-        result = self.cursor.execute("SELECT LocationLatitude, LocationLongitude FROM Photos WHERE PhotoID=?", (entry_id,))
+        result = self.cursor.execute("SELECT PhotoName FROM Photos WHERE PhotoID=?", (entry_id,))
         result = result.fetchall()
         self._close_database()
-        return result
+
+        for row in result:
+            return row[0]
+
+    def get_location_by_entry_id(self, entry_id: int) -> Tuple[float, float]:
+        self._open_database()
+        result = self.cursor.execute("SELECT LocationLatitude, LocationLongitude FROM Photos WHERE PhotoID=?",
+                                     (entry_id,))
+        result = result.fetchall()
+        self._close_database()
+
+        for row in result:
+            return row[0], row[1]
 
     def get_colors_by_entry_id(self, entry_id: int):
         self._open_database()

@@ -2,6 +2,7 @@ import os
 from enum import Enum
 from typing import Optional
 from shutil import copy, rmtree
+import ntpath
 
 
 class ImageExtension(str, Enum):
@@ -16,6 +17,11 @@ def get_image_extension(file: str) -> Optional[ImageExtension]:
         return ImageExtension(ext)
     except ValueError:
         return None
+
+
+def get_image_name(file: str) -> str:
+    head, tail = ntpath.split(file)
+    return tail or ntpath.basename(head)
 
 
 def copy_image(file: str, dir: str):

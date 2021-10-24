@@ -1,7 +1,7 @@
 import datetime as datetime
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, List, Union, Any
+from typing import Optional, List, Any
 
 
 class MetaDataKey(str, Enum):

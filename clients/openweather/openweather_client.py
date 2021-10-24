@@ -27,13 +27,10 @@ class OpenWeatherClient:
 
         # Openweather student pack api provides only 1 year back forecasts, so id given datatime is out of this range,
         # request is build for the same day but less then 1 year back
-        if datetime.now().year - date_time.year > 1:
+        while (datetime.now() - date_time).days > 365:
             logging.warning(f"Given datetime {date_time} is more then 1 year back")
-            date_time = datetime(year=date_time.year + (datetime.now().year - date_time.year - 1),
-                                 month=date_time.month,
-                                 day=date_time.day,
-                                 hour=date_time.hour)
-            logging.warning(f"Building request for datetime {date_time}")
+            date_time = date_time + timedelta(days=365)
+        logging.warning(f"Building request for datetime {date_time}")
 
         url = f'{url}' \
               f'&start={int((date_time - timedelta(hours=1)).timestamp())}' \
