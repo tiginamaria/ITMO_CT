@@ -6,9 +6,9 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 
 from clients.yandex_geocoder.yandex_geocoder_client import YandexGeocoderClient
-from model.image_datatime_info import DateTimeInfo
+from model.image_datatime_info import ImageDateTimeInfo
 from model.image_exif_info import ImageExifInfo, ExifDataKey
-from model.image_gps_info import GPSInfo
+from model.image_gps_info import ImageGPSInfo
 from utils.image_file_utils import get_image_name
 
 
@@ -73,4 +73,4 @@ def read_exif_info(image_file: str, geocoder_client: YandexGeocoderClient) -> Op
         return None
 
     image.close()
-    return ImageExifInfo(DateTimeInfo.from_datetime(date_time), GPSInfo(location[0], location[1]))
+    return ImageExifInfo(ImageDateTimeInfo.from_datetime(date_time), ImageGPSInfo(location[0], location[1]))

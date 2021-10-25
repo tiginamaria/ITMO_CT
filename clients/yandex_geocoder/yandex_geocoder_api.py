@@ -20,7 +20,7 @@ class Point:
     pos: str
 
     def to_lat_lon(self) -> Tuple[float, float]:
-        lat, lon = map(float, self.pos.split(' '))
+        lon, lat = map(float, self.pos.split(' '))
         return lat, lon
 
 

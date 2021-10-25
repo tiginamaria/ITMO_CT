@@ -1,8 +1,9 @@
+import datetime as datetime
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from PIL import Image
 
@@ -11,9 +12,12 @@ from clients.yandex_geocoder.yandex_geocoder_client import YandexGeocoderClient
 from database.database_sqlite import ImageDatabase
 from image_processing.color_processing import get_color_info
 from image_processing.exif_processing import get_exif_info_from_image, read_exif_info
-from image_processing.weather_processing import get_weather_info, read_weather_info
+from image_processing.weather_processing import get_weather_info
+from model.image_colors_info import ImageColorsInfo
+from model.image_exif_info import ImageExifInfo
+from model.image_info import ImageInfo
 from utils.config import load_config
-from utils.image_file_utils import get_image_extension, get_image_name, create_dir, remove_dir
+from utils.image_file_utils import get_image_extension, get_image_name, create_dir, remove_dir, get_parent_path
 
 PROJECT_DIR = Path(__file__).parents[1]
 RESOURCES_DIR = PROJECT_DIR / 'resources'
@@ -89,16 +93,15 @@ class ImageDatabaseSQLiteClient:
                 raise Exception(f"Failed to get or read exif info for image: {image_id}")
 
         # Add exif info to database
-        self._db.add_datetime(image_id, exif_info.data_time.date_time)
-        self._db.add_location(image_id, exif_info.gps_info.latitude, exif_info.gps_info.longitude)
+        self._db.add_exif_info(image_id, exif_info)
 
     def _add_weather_info_for_image(self, image_id: int):
-        location = self._db.get_location_by_entry_id(image_id)
-        date_time = self._db.get_datetime_by_entry_id(image_id)
+        gps_info = self._db.get_gps_info_by_entry_id(image_id)
+        date_time_info = self._db.get_datetime_by_entry_id(image_id)
 
         # Extracting weather information
         logging.info(f"Extracting weather information from image: {image_id}")
-        weather_info = get_weather_info(location, date_time, self._open_weather_client)
+        weather_info = get_weather_info(gps_info.location(), date_time_info.date_time, self._open_weather_client)
 
         # If there is no weather info try to read it from user
         if weather_info is None:
@@ -111,7 +114,7 @@ class ImageDatabaseSQLiteClient:
                 raise Exception(f"Failed to get or read weather info for image: {image_id}")
 
         # Add weather info to database
-        self._db.add_weather(image_id, weather_info.clouds)
+        self._db.add_weather_info(image_id, weather_info)
 
     def _add_color_info_for_image(self, image_id: int):
         image_file = self._get_image_file(image_id)
@@ -122,7 +125,7 @@ class ImageDatabaseSQLiteClient:
 
         # Add colors info to database
         for color in color_info.colors:
-            self._db.add_color(image_id, color.r, color.g, color.b, int(color.percent * 100))
+            self._db.add_color_info(image_id, color)
 
     def _add_images_info_to_database(self, image_ids: List[int]) -> List[int]:
         processed_image_ids = []
@@ -137,7 +140,7 @@ class ImageDatabaseSQLiteClient:
 
             except Exception as e:
                 logging.error(f'Skipping image {image_id} due to error:', e)
-                self._db.delete_image_by(image_id)
+                self._db.delete_image_by_entry_id(image_id)
                 remove_dir(self._get_image_resource_dir(image_id))
                 continue
 
@@ -147,10 +150,55 @@ class ImageDatabaseSQLiteClient:
         logging.info(f'Finish to add images infos to database')
         return processed_image_ids
 
-    def add_all_images(self, image_paths: List[str]):
+    def add_images(self, image_paths: List[str]):
         added_image_ids = self._add_images_to_database(image_paths)
         print(f'{len(added_image_ids)}/{len(image_paths)} have been successfully uploaded')
 
         # TODO: Make operation async
         processed_image_ids = self._add_images_info_to_database(added_image_ids)
         print(f'{len(processed_image_ids)}/{len(added_image_ids)} have been successfully processed')
+
+    def get_images(self,
+                   location: Tuple[float, float],
+                   date_time: datetime.datetime,
+                   weather: int,
+                   hour_delta=3,
+                   month_delta=1,
+                   latitude_delta=0.5,
+                   longitude_delta=0.5,
+                   weather_delta=30) -> List[ImageInfo]:
+
+        image_ids = self._db.get_entry_id_by_parameters(
+            hour_interval_left=(date_time.hour - hour_delta + 24) % 24,
+            hour_interval_right=(date_time.hour + hour_delta + 24) % 24,
+            month_interval_left=(date_time.month - month_delta) % 12,
+            month_interval_right=(date_time.month + month_delta) % 12,
+            latitude_interval_left=location[0] - latitude_delta,
+            latitude_interval_right=location[0] + latitude_delta,
+            longitude_interval_left=location[1] - longitude_delta,
+            longitude_interval_right=location[1] + longitude_delta,
+            weather_interval_left=max(0, weather - weather_delta),
+            weather_interval_right=min(100, weather + weather_delta),
+        )
+
+        images = []
+        for image_id in image_ids:
+            image_file = self._get_image_file(image_id)
+            image_pallet = os.path.join(get_parent_path(image_file), 'palette.png')
+            image_clusters = os.path.join(get_parent_path(image_file), 'clusters.png')
+
+            image = ImageInfo(
+                id=image_id,
+                name=self._db.get_image_name_by_entry_id(image_id),
+                exif_info=ImageExifInfo(
+                    date_time_info=self._db.get_datetime_by_entry_id(image_id),
+                    gps_info=self._db.get_gps_info_by_entry_id(image_id)
+                ),
+                weather_info=self._db.get_weather_info_by_entry_id(image_id),
+                colors_info=ImageColorsInfo(self._db.get_colors_info_by_entry_id(image_id)),
+                image_path=image_file,
+                palette_path=image_pallet,
+                clusters_path=image_clusters
+            )
+            images.append(image)
+        return images

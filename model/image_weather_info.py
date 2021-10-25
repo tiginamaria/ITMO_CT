@@ -1,36 +1,18 @@
 from dataclasses import dataclass
-
-import pandas as pd
-
-from database.model.columns import WeatherInfoColumnName
+from typing import Optional
 
 
 @dataclass
 class ImageWeatherInfo:
-    weather_id: int
-    temperature: float
-    wind_speed: float
-    wind_direction: int
     clouds: int
-    humidity: int
+    weather_id: Optional[int] = None
+    temperature: Optional[float] = None
+    wind_speed: Optional[float] = None
+    wind_direction: Optional[int] = None
+    humidity: Optional[int] = None
 
     @classmethod
-    def from_row(cls, row: pd.Series) -> 'ImageWeatherInfo':
+    def from_row(cls, row) -> 'ImageWeatherInfo':
         return ImageWeatherInfo(
-            weather_id=row[WeatherInfoColumnName.WEATHER_ID],
-            temperature=row[WeatherInfoColumnName.TEMPERATURE],
-            wind_speed=row[WeatherInfoColumnName.WIND_SPEED],
-            wind_direction=row[WeatherInfoColumnName.WIND_DIRECTION],
-            clouds=row[WeatherInfoColumnName.CLOUDS],
-            humidity=row[WeatherInfoColumnName.HUMIDITY]
+            clouds=row[0]
         )
-
-    def to_json(self):
-        return {
-            WeatherInfoColumnName.WEATHER_ID: self.weather_id,
-            WeatherInfoColumnName.TEMPERATURE: self.temperature,
-            WeatherInfoColumnName.WIND_SPEED: self.wind_speed,
-            WeatherInfoColumnName.WIND_DIRECTION: self.wind_direction,
-            WeatherInfoColumnName.CLOUDS: self.clouds,
-            WeatherInfoColumnName.HUMIDITY: self.humidity
-        }

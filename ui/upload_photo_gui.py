@@ -54,11 +54,3 @@ class DialogWidget(QWidget):
                                                 "All files (*);; All Image Files (*.jpg *.jpeg *.png)", options=options)
         return files
 
-
-def select_photos_to_upload() -> List[str]:
-    photos_selector = PhotoSelector(sys.argv)
-    photos_selector.setQuitOnLastWindowClosed(True)
-    selected_photos_path = photos_selector.run_ui().copy()
-    photos_selector.closeAllWindows()
-    photos_selector.quit()
-    return selected_photos_path

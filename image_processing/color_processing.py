@@ -102,8 +102,6 @@ def get_color_info(image_file: str) -> ImageColorsInfo:
 
     colors = []
     for center, count in zip(centers, counts):
-        colors.append(ImageColorInfo(r=center[0], g=center[1], b=center[2],
-                                     hex=rgd_to_hex(center),
-                                     percent=count / img.size))
+        colors.append(ImageColorInfo(r=center[0], g=center[1], b=center[2], percent=int(100 * (count / img.size))))
 
     return ImageColorsInfo(colors=colors)
