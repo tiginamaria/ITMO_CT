@@ -1,24 +1,21 @@
-from typing import Optional
+from datetime import datetime
+from typing import Optional, Tuple
 
 from clients.openweather.openweather_client import OpenWeatherClient
-from model.image_exif_info import ImageExifInfo
 from model.image_weather_info import ImageWeatherInfo
 
 
-def get_weather_data(exif_info: ImageExifInfo, api_key: str) -> Optional[ImageWeatherInfo]:
+def get_weather_info(location: Tuple[float, float], date_time: datetime, open_weather_client: OpenWeatherClient) \
+        -> Optional[ImageWeatherInfo]:
     """ Get weather information by given data in exif_info (location and data).
-    :param api_key: api_key for open_weather
-    :param exif_info: image exif information
+    :param date_time: datetime to get weather forecast for
+    :param location: location to get weather forecast for
+    :param open_weather_client: open weather client to get weather
     :return: image weather information
     """
 
-    # Create client object
-    open_weather_client = OpenWeatherClient(api_key)
-
     # Using api get weather for location and data in exif data
-    weather_info = open_weather_client.get_history_weather(
-        (exif_info.gps_info.latitude, exif_info.gps_info.longitude),
-        exif_info.data_time.date_time)
+    weather_info = open_weather_client.get_history_weather(location, date_time)
 
     if weather_info is None:
         return None
@@ -31,3 +28,7 @@ def get_weather_data(exif_info: ImageExifInfo, api_key: str) -> Optional[ImageWe
         clouds=weather_info.clouds.all,
         humidity=weather_info.main.humidity
     )
+
+
+def read_weather_info():
+    pass

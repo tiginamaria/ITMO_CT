@@ -4,11 +4,11 @@ from collections import Counter
 
 import imageio
 import numpy as np
-from PIL import ImageColor
-from PIL.Image import Image
+from PIL import ImageColor, Image
 from sklearn.cluster import KMeans
 
 from model.image_colors_info import ImageColorInfo, ImageColorsInfo
+from utils.image_file_utils import get_parent_path
 
 
 def _get_colors_clusters(img: np.array, colors_count: int = 10):
@@ -80,23 +80,25 @@ def hex_to_rgb(hex: str) -> np.array:
     return ImageColor.getcolor(hex, "RGB")
 
 
-def get_color_info(image: Image, output_dir: str) -> ImageColorsInfo:
+def get_color_info(image_file: str) -> ImageColorsInfo:
     """ Get main colors from image using k-mean clustering method.
-    :param image: image to get main colors from
-    :param output_dir: output directory to save color extraction results
+    :param image_file: path to file with image to get main colors from
     :return: image color information
     """
+
+    image = Image.open(image_file)
+    image_dir = get_parent_path(image_file)
 
     img = np.asarray(image)
     centers, counts, labels = _get_colors_clusters(img)
 
     # Build and visualize clustered image
-    _build_clustered_image(img, centers, labels, output_dir)
+    _build_clustered_image(img, centers, labels, image_dir)
 
     # centers, counts = _sort_colors_by_count(centers, counts)
 
     # Build and visualize colors pallet
-    _build_colors_pallet(centers, output_dir)
+    _build_colors_pallet(centers, image_dir)
 
     colors = []
     for center, count in zip(centers, counts):

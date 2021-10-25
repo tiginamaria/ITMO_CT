@@ -24,6 +24,12 @@ def get_image_name(file: str) -> str:
     return tail or ntpath.basename(head)
 
 
+def get_parent_path(file: str) -> str:
+    from pathlib import Path
+    path = Path(file)
+    return path.parent.absolute()
+
+
 def copy_image(file: str, dir: str):
     copy(file, dir)
 

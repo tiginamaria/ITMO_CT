@@ -1,19 +1,26 @@
 import logging
+from datetime import datetime
+from typing import Optional
 
 from PIL import Image
 from PIL.ExifTags import TAGS
 
+from clients.yandex_geocoder.yandex_geocoder_client import YandexGeocoderClient
+from model.image_datatime_info import DateTimeInfo
 from model.image_exif_info import ImageExifInfo, ExifDataKey
-from model.image_meta_info import ImageMetaInfo
+from model.image_gps_info import GPSInfo
+from utils.image_file_utils import get_image_name
 
 
-def extract_exif_info_from_image(image: Image, meta_info: ImageMetaInfo = None) -> ImageExifInfo:
+def get_exif_info_from_image(image_file: str) -> Optional[ImageExifInfo]:
     """
     Method extracts exif data from image.
-    :param image: image to extract exif data
-    :param meta_info: if exif data is not provided in image information must be given in meta
+    :param image_file: path to image to extract exif data
     :return: exif information
     """
+
+    # Opening the image
+    image = Image.open(image_file)
 
     # Extracting the exif metadata
     exif_data = image.getexif()
@@ -32,8 +39,38 @@ def extract_exif_info_from_image(image: Image, meta_info: ImageMetaInfo = None) 
     if ExifDataKey.GPS_INFO in exif_data_dict and ExifDataKey.GPS_INFO in exif_data_dict:
         return ImageExifInfo.from_exif_data(exif_data_dict)
     else:
-        logging.warning("DateTime and GPSInfo not provided in image exif data. Trying to use meta data")
-        if meta_info is not None:
-            return ImageExifInfo.from_meta_info(meta_info)
-        else:
-            raise Exception("DateTime and GPSInfo not provided in image meta and exif data")
+        logging.warning("DateTime and GPSInfo not provided in image exif data.")
+        return None
+
+
+def read_exif_info(image_file: str, geocoder_client: YandexGeocoderClient) -> Optional[ImageExifInfo]:
+    image_name = get_image_name(image_file)
+    image = Image.open(image_file)
+    # image.show()
+    print(f"Service can not detect where {image_name} was made?")
+    print(f"Please, enter address (e.x. Ленинский пр. 161, 13) or location (e.x. 30.23 60.132) for it:")
+    result = input()
+    try:
+        location = list(map(float, result.split(' ')))
+        print(f"Got location: {location[0], location[1]}")
+    except Exception:
+        location = geocoder_client.get_location_by_address(result)
+        if location is None:
+            logging.error(f"Can not get location for address {result}")
+            # image.close()
+            return None
+
+        print(f"Got address: {result}, detect location {location[0], location[1]}")
+
+    print(f"Please, enter datetime (e.x. 2021-10-25 09:31:32) for it:")
+    result = input()
+    try:
+        date_time = datetime.fromisoformat(result)
+        print(f"Got datetime: {date_time}")
+    except Exception:
+        logging.error(f"Can not get datetime from string {result}")
+        # image.close()
+        return None
+
+    image.close()
+    return ImageExifInfo(DateTimeInfo.from_datetime(date_time), GPSInfo(location[0], location[1]))

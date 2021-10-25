@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 import pandas as pd
 
-from model.image_datatime_info import DataTimeInfo
+from model.image_datatime_info import DateTimeInfo
 from model.image_gps_info import GPSInfo
 from model.image_meta_info import ImageMetaInfo
 
@@ -19,7 +19,7 @@ class ExifDataKey(str, Enum):
 class ImageExifInfo:
     """ Class which holds all information about image. """
 
-    data_time: DataTimeInfo
+    data_time: DateTimeInfo
     gps_info: GPSInfo
 
     @staticmethod
@@ -30,7 +30,7 @@ class ImageExifInfo:
         """
 
         return ImageExifInfo(
-            data_time=DataTimeInfo.from_exif_data(exif_data[ExifDataKey.DATETIME]),
+            data_time=DateTimeInfo.from_string(exif_data[ExifDataKey.DATETIME]),
             gps_info=GPSInfo.from_exif_data(exif_data[ExifDataKey.GPS_INFO]),
         )
 
@@ -42,7 +42,7 @@ class ImageExifInfo:
         """
 
         return ImageExifInfo(
-            data_time=DataTimeInfo.from_datetime(meta_info.date_time),
+            data_time=DateTimeInfo.from_datetime(meta_info.date_time),
             gps_info=GPSInfo(meta_info.location[0], meta_info.location[1]),
         )
 
@@ -53,7 +53,7 @@ class ImageExifInfo:
         :return: exif information
         """
         return ImageExifInfo(
-            data_time=DataTimeInfo.from_row(row),
+            data_time=DateTimeInfo.from_row(row),
             gps_info=GPSInfo.from_row(row)
         )
 

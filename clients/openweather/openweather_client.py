@@ -30,7 +30,8 @@ class OpenWeatherClient:
         while (datetime.now() - date_time).days > 365:
             logging.warning(f"Given datetime {date_time} is more then 1 year back")
             date_time = date_time + timedelta(days=365)
-        logging.warning(f"Building request for datetime {date_time}")
+
+        logging.info(f"Building request for datetime {date_time}")
 
         url = f'{url}' \
               f'&start={int((date_time - timedelta(hours=1)).timestamp())}' \
