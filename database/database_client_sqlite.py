@@ -179,8 +179,8 @@ class ImageDatabaseSQLiteClient:
         image_ids = self._db.get_entry_id_by_parameters(
             hour_interval_left=(date_time.hour - hour_delta + 24) % 24,
             hour_interval_right=(date_time.hour + hour_delta + 24) % 24,
-            month_interval_left=(date_time.month - month_delta) % 12,
-            month_interval_right=(date_time.month + month_delta) % 12,
+            month_interval_left=(date_time.month - month_delta - 1) % 12 + 1,
+            month_interval_right=(date_time.month + month_delta - 1) % 12 + 1,
             latitude_interval_left=location[0] - latitude_delta,
             latitude_interval_right=location[0] + latitude_delta,
             longitude_interval_left=location[1] - longitude_delta,
