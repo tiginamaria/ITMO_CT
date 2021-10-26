@@ -118,6 +118,8 @@ class ImageDatabase:
         request_text += " AND (Weather BETWEEN {} AND {})" \
             .format(weather_interval_left, weather_interval_right)
 
+        print(request_text)
+
         self._open_database()
         result = self.cursor.execute(request_text)
         result = result.fetchall()
