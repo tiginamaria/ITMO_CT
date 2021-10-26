@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from PIL import Image
-
+import imagehash
 from clients.openweather.openweather_client import OpenWeatherClient
 from clients.yandex_geocoder.yandex_geocoder_client import YandexGeocoderClient
 from database.database_sqlite import ImageDatabase
@@ -60,8 +60,11 @@ class ImageDatabaseSQLiteClient:
                 logging.warning(f"File {image_name} is not an image")
                 continue
 
+            image = Image.open(image_path)
+
             # Save image to database
-            image_id = self._db.add_new_image(image_name)
+            image_hash = str(imagehash.average_hash(image))
+            image_id = self._db.add_new_image(image_name, image_hash)
             image_ids.append(image_id)
 
             # Create directory for new image in resources directory
@@ -69,8 +72,13 @@ class ImageDatabaseSQLiteClient:
             create_dir(image_resources_dir)
 
             # Copy image to resources directory
-            image = Image.open(image_path)
-            image.save(os.path.join(image_resources_dir, image_name), quality=20, optimize=True)
+            image_resource_file = os.path.join(image_resources_dir, image_name)
+            if 'exif' in image.info:
+                image.save(image_resource_file, quality=20, optimize=True,
+                           exif=image.info['exif'])
+            else:
+                image.save(image_resource_file, quality=20, optimize=True)
+
             logging.info(f"File {image_path} was saved to database with id {image_id}")
 
         logging.info(f'Finish to add images to database')
@@ -139,7 +147,7 @@ class ImageDatabaseSQLiteClient:
                 self._add_color_info_for_image(image_id)
 
             except Exception as e:
-                logging.error(f'Skipping image {image_id} due to error:', e)
+                logging.error(f'Skipping image {image_id} due to error: {e}')
                 self._db.delete_image_by_entry_id(image_id)
                 remove_dir(self._get_image_resource_dir(image_id))
                 continue

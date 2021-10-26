@@ -12,7 +12,7 @@ class ImageExtension(str, Enum):
 
 
 def get_image_extension(file: str) -> Optional[ImageExtension]:
-    ext = os.path.splitext(file)[1]
+    ext = os.path.splitext(file)[1].lower()
     try:
         return ImageExtension(ext)
     except ValueError:

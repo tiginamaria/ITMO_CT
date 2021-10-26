@@ -17,14 +17,14 @@ class ImageDatabase:
 
     # Filling functions
 
-    def add_new_image(self, photo_name: str) -> int:
+    def add_new_image(self, photo_name: str, photo_hash: str) -> int:
 
         current_dt = datetime.utcnow()
         current_dt = str(current_dt).split('.')[0]
 
         self._open_database()
-        result = self.cursor.execute("INSERT INTO Photos (PhotoName, UploadDateTime) VALUES (?, ?)",
-                                     (photo_name, current_dt))
+        result = self.cursor.execute("INSERT INTO Photos (PhotoName, PhotoHash, UploadDateTime) VALUES (?, ?, ?)",
+                                     (photo_name, photo_hash, current_dt))
         entry_id = result.lastrowid
         self._close_database()
 

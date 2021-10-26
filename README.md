@@ -22,5 +22,5 @@ jupyter nbextension enable --py --sys-prefix ipyleaflet
 ```
 2. Run Jupyter Notebook  
 ``` 
-notebook notebook colors_of_city.ipynb
+jupyter notebook colors_of_city.ipynb
 ```
